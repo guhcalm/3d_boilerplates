@@ -1,5 +1,15 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber"
-import { useEffect, useState } from "react"
+import {
+  Bloom,
+  ChromaticAberration,
+  Outline,
+  EffectComposer,
+  Select,
+  Selection,
+  SelectiveBloom
+} from "@react-three/postprocessing"
+import { BlendFunction } from "postprocessing"
+import { useEffect, useRef, useState } from "react"
 import {
   ACESFilmicToneMapping,
   EquirectangularRefractionMapping,
@@ -7,11 +17,14 @@ import {
   sRGBEncoding,
   Group,
   MeshStandardMaterial,
-  Color
+  Color,
+  MeshPhysicalMaterial
 } from "three"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader"
+import { SimplifyModifier } from "three/examples/jsm/modifiers/SimplifyModifier"
+import { GizmoHelper, GizmoViewport } from "@react-three/drei"
 import { Layout } from "./components"
 
 const useLoadMannequin = () => {
@@ -24,10 +37,14 @@ const useLoadMannequin = () => {
         if (object instanceof Mesh) {
           object.receiveShadow = true
           object.castShadow = true
-          object.material = new MeshStandardMaterial({
-            color: "rgb(2, 2, 5)",
+          object.material = new MeshPhysicalMaterial({
+            color: "white",
             roughness: 0,
-            metalness: 0
+            metalness: 0,
+            transmission: 1,
+            ior: 1.5,
+            specularIntensity: 1.5,
+            emissiveIntensity: 0.5
           })
           if (object.material?.map) object.material.map.anisotropy = 16
         }
@@ -39,11 +56,46 @@ const useLoadMannequin = () => {
 }
 
 const Mannequin = () => {
-  useFrame(({ scene }) => {
-    const { rotation } = scene
+  const manequinRef = useRef()
+  const boxRef = useRef()
+  useFrame(({ raycaster, scene }) => {
+    const { rotation } = manequinRef.current!
     rotation.y += 0.005
+    const instersection = raycaster.intersectObjects(
+      manequinRef.current.children!
+    )
+    if (instersection[0]) {
+      const [
+        {
+          point,
+          face: { normal }
+        }
+      ] = instersection
+      boxRef.current.position.copy(point)
+    }
   })
-  return <primitive object={useLoadMannequin()} />
+  return (
+    <>
+      <Select enabled={false}>
+        <group ref={manequinRef}>
+          <primitive object={useLoadMannequin()} />
+        </group>
+      </Select>
+      <mesh
+        ref={boxRef}
+        material={
+          new MeshPhysicalMaterial({
+            color: "red",
+            roughness: 0,
+            metalness: 0,
+            emissiveIntensity: 0.5
+          })
+        }
+      >
+        <sphereGeometry args={[0.03, 50, 50]} />
+      </mesh>
+    </>
+  )
 }
 
 const useSetupScene = () => {
@@ -62,14 +114,39 @@ const useSetupScene = () => {
     new RGBELoader().load(hdrUrl.href, texture => {
       texture.mapping = EquirectangularRefractionMapping
       scene.environment = texture
-      scene.background = new Color("black")
     })
   }, [])
 }
 
 const Scene = () => {
   useSetupScene()
-  return <Mannequin />
+  return (
+    <>
+      <Selection>
+        <Mannequin />
+        <EffectComposer autoClear={false} multisampling={8}>
+          <SelectiveBloom
+            intensity={1.3}
+            luminanceThreshold={0.15}
+            luminanceSmoothing={0.025}
+          />
+
+          <Outline blur visibleEdgeColor="red" edgeStrength={100} />
+        </EffectComposer>
+      </Selection>
+
+      <GizmoHelper
+        alignment="bottom-right"
+        margin={[80, 80]}
+        renderPriority={2}
+      >
+        <GizmoViewport
+          axisColors={["hotpink", "aquamarine", "#3498DB"]}
+          labelColor="black"
+        />
+      </GizmoHelper>
+    </>
+  )
 }
 
 export const MyApp = () => (
