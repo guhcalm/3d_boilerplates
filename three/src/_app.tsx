@@ -58,7 +58,7 @@ const Canvas = () => {
             object.receiveShadow = true
             object.castShadow = true
             object.material = new MeshStandardMaterial({
-              color: "rgb(2, 2, 5)",
+              color: "rgb(0, 0, 0)",
               roughness: 0,
               metalness: 0
             })
@@ -74,12 +74,12 @@ const Canvas = () => {
       gl.render(scene, camera)
     })
 
-    window.addEventListener("resize", () => {
+    addEventListener("resize", () => {
       camera.aspect = innerWidth / innerHeight
       camera.updateProjectionMatrix()
       gl.setSize(innerWidth, innerHeight)
     })
-    window.addEventListener("mousemove", ({ x, y }) => {
+    addEventListener("mousemove", ({ x, y }) => {
       mouse.x = (x / innerWidth) * 2 - 1
       mouse.y = -((y / innerHeight) * 2 - 1)
       raycaster.setFromCamera(mouse, camera)
