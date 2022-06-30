@@ -1,0 +1,121 @@
+{
+  "name": "@guhcalm/minimal-boilerplate",
+  "version": "1.0.0",
+  "main": "src/index.tsx",
+  "author": "guhcalm <guhcalm@outlook.com>",
+  "description": "My Minimal Boilerplate to React-Redux-Styled-Components-Typescript-Webpack",
+  "license": "MIT",
+  "scripts": {
+    "build": "webpack",
+    "dev": "webpack serve",
+    "prettier": "prettier --write \"src/**/*\"",
+    "lint:fix": "eslint --fix \"src/**/*\""
+  },
+  "repository": {
+    "url": "https://github.com/guhcalm/minimal-boilerplate.git"
+  },
+  "dependencies": {
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0",
+    "styled-components": "^5.3.5",
+    "three": "^0.142.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.18.2",
+    "@babel/preset-env": "^7.18.2",
+    "@babel/preset-react": "^7.17.12",
+    "@babel/preset-typescript": "^7.17.12",
+    "@types/dotenv-webpack": "^7.0.3",
+    "@types/react": "^18.0.11",
+    "@types/react-dom": "^18.0.5",
+    "@types/styled-components": "^5.1.25",
+    "@types/three": "^0.141.0",
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
+    "@typescript-eslint/parser": "^5.27.0",
+    "babel-loader": "^8.2.5",
+    "dotenv-webpack": "^7.1.0",
+    "eslint": "^7.32.0 || ^8.2.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.28.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "html-webpack-plugin": "^5.5.0",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.0",
+    "prettier": "^2.6.2",
+    "terser-webpack-plugin": "^5.3.3",
+    "ts-node": "^10.8.1",
+    "typescript": "^4.7.3",
+    "webpack": "^5.73.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.9.1"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      [
+        "@babel/preset-react",
+        {
+          "runtime": "automatic"
+        }
+      ],
+      "@babel/preset-typescript"
+    ]
+  },
+  "prettier": {
+    "semi": false,
+    "arrowParens": "avoid",
+    "bracketSpacing": true,
+    "singleQuote": false,
+    "tabWidth": 2,
+    "printWidth": 80,
+    "trailingComma": "none"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "es2021": true,
+      "node": true
+    },
+    "extends": [
+      "plugin:react/recommended",
+      "airbnb",
+      "plugin:prettier/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "ecmaFeatures": {
+        "jsx": true
+      },
+      "ecmaVersion": "latest",
+      "sourceType": "module"
+    },
+    "plugins": [
+      "react",
+      "@typescript-eslint",
+      "prettier"
+    ],
+    "rules": {
+      "react/function-component-definition": "off",
+      "new-cap": "off",
+      "react/react-in-jsx-scope": "off",
+      "react/jsx-filename-extension": "off",
+      "import/no-unresolved": "off",
+      "import/extensions": "off",
+      "import/no-extraneous-dependencies": "off",
+      "no-unused-vars": "off",
+      "no-shadow": "off",
+      "import/prefer-default-export": "off",
+      "no-param-reassign": "off",
+      "@typescript-eslint/no-shadow": [
+        "error"
+      ]
+    }
+  },
+  "lint-staged": {
+    "./src/**/*.{js,jsx,ts,tsx}": "eslint --fix"
+  }
+}
