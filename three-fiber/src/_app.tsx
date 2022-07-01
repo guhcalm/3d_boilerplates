@@ -6,14 +6,16 @@ import {
   Selection,
   SelectiveBloom
 } from "@react-three/postprocessing"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import {
   ACESFilmicToneMapping,
   EquirectangularRefractionMapping,
   Mesh,
   sRGBEncoding,
   Group,
-  MeshPhysicalMaterial
+  MeshPhysicalMaterial,
+  Float32BufferAttribute,
+  Vector3
 } from "three"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
@@ -25,7 +27,7 @@ const MannequinMaterial = new MeshPhysicalMaterial({
   color: "white",
   roughness: 0,
   metalness: 0,
-  transmission: 1,
+  transmission: 0,
   ior: 1.5,
   specularIntensity: 1.5,
   emissiveIntensity: 0.5
@@ -61,23 +63,40 @@ const useLoadMannequin = () => {
 const Mannequin = () => {
   const manequinRef = useRef()
   const boxRef = useRef()
+  boxRef.current?.geometry.translate(0, 0.05, 0)
+  boxRef.current?.geometry.rotateX(Math.PI / 2)
   useFrame(({ raycaster }) => {
-    const { rotation } = manequinRef.current!
-    rotation.y += 0.005
-    const intersection = raycaster.intersectObjects(
-      manequinRef.current.children!
-    )
-    if (intersection[0]) boxRef.current.position.copy(intersection[0].point)
+    const intersection = raycaster.intersectObject(manequinRef.current)
+    if (intersection.length > 0) {
+      const [{ point, face }] = intersection
+      boxRef.current.position.copy(point)
+      boxRef.current.lookAt(face.normal)
+    }
   })
   return (
     <Select enabled={false}>
-      <group ref={manequinRef}>
+      <mesh ref={manequinRef}>
+        <sphereGeometry args={[0.3, 50, 50]} />
+      </mesh>
+      <group>
         <primitive object={useLoadMannequin()} />
       </group>
       <mesh ref={boxRef} material={SphereMaterial}>
-        <sphereGeometry args={[0.03, 50, 50]} />
+        <coneBufferGeometry args={[0.01, 0.06, 8]} />
       </mesh>
     </Select>
+  )
+}
+
+const Line = () => {
+  const position = useMemo(() => {
+    const position = []
+  }, [])
+  return (
+    <mesh>
+      <bufferGeometry position={new Float32BufferAttribute(position, 3)} />
+      <lineBasicMaterial color="white" />
+    </mesh>
   )
 }
 
@@ -90,8 +109,9 @@ const useSetupScene = () => {
     gl.toneMappingExposure = 1
     gl.outputEncoding = sRGBEncoding
     gl.shadowMap.enabled = true
-    camera.position.z = 1
-    camera.position.y = 0.3
+    camera.position.x = 0
+    camera.position.y = 1
+    camera.position.z = 0
     camera.lookAt(0, 0, 0)
     const hdrUrl = new URL("../public/assets/hdr.hdr", import.meta.url)
     new RGBELoader().load(hdrUrl.href, texture => {
@@ -105,6 +125,7 @@ const Scene = () => {
   useSetupScene()
   return (
     <Selection>
+      <axesHelper args={[10]} />
       <Mannequin />
       <EffectComposer autoClear={false} multisampling={8}>
         <Outline blur visibleEdgeColor="red" edgeStrength={100} />
